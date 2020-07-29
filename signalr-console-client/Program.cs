@@ -10,34 +10,34 @@ namespace signalr_console_client
 
     class Program
     {
-        private static HubConnection HubConnection;
+        private static HubConnection _hubConnection;
         private static readonly HttpClient Client = new HttpClient();
-        private static readonly string NegotiateUrl = "your-signalr-negotiate-url";
+        private const string NegotiateUrl = "your-negotiate-url";
 
         static async Task Main(string[] args)
         {   
-            var test = await GetSignalRInfo();
+            var connectionInfo = await GetSignalRInfo();
 
-            HubConnection = new HubConnectionBuilder()
-                .WithUrl(test.Url, option =>
+            _hubConnection = new HubConnectionBuilder()
+                .WithUrl(connectionInfo.Url, option =>
                 {
                     option.AccessTokenProvider = () =>
                     {
-                        return Task.FromResult(test.AccessToken);
+                        return Task.FromResult(connectionInfo.AccessToken);
                     };                    
                 }).Build();
             
-            HubConnection.On("newMessage",
+            _hubConnection.On("newMessage",
                 (object message) =>
                 {
                     Console.WriteLine("worked!");
                 }); 
 
 
-            await HubConnection.StartAsync();
+            await _hubConnection.StartAsync();
             Console.WriteLine("Client started... Press any key to close the connection");
             Console.ReadLine();
-            await HubConnection.DisposeAsync();
+            await _hubConnection.DisposeAsync();
             Console.WriteLine("Client is shutting down...");
         }
 
@@ -45,7 +45,7 @@ namespace signalr_console_client
         {
             // Retrieve the url and access token 
             var response = await Client.PostAsync(NegotiateUrl, null);
-            string result = await response.Content.ReadAsStringAsync();
+            var result = await response.Content.ReadAsStringAsync();
             var jsonToken = JToken.Parse(result);
 
             return new GetSignalRInfo
