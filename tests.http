@@ -2,6 +2,7 @@
 ### Get access token and URL
 POST http://localhost:7071/api/negotiate
 
+
 ### Post message to signalr hub
 POST http://localhost:7071/api/messages
 Content-Type: application/json
